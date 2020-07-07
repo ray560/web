@@ -1,7 +1,7 @@
 <?php
 
-	$consumerKey = '2L5KKBRT62iOiFAXfpbXsqR9TytA00w8';
-	$consumerSecret = 'GzCe4LUsGJLT2GvG';
+	$consumerKey = 'erGAfYRAP4u0RBJbYB6ZAa9oxGajx6jX';
+	$consumerSecret = 'dRvDmBfAAVmiIZlP';
 	
 	$headers = ['Content-Type:application/json; charset=utf8'];
 	

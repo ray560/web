@@ -1,3 +1,4 @@
+<?php
 //This file processes the Mpesa Response
 
 
