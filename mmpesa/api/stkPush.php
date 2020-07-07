@@ -16,5 +16,7 @@ $phoneNumber = $data->phoneNumber;
 $stkAmount=$data->Amount;
 
 echo $mpesa->stk($phoneNumber, $stkAmount);
-// echo $mpesa->stk($phoneNumber, $stkAmount);
+//demonstration of how to call the mpesa stk push method. 
+//use the above method or call this api.
+
 

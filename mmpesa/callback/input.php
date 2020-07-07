@@ -6,6 +6,9 @@
   {
       fwrite($fp, "Error: no data written");
   }
+    //set here all methods to save this data in your database
     fclose($fp);
-  // echo '{"ResultCode": 0, "ResultDesc": "The service was accepted successfully", "ThirdPartyTransID": "1234567890"}';
+  echo '{"ResultCode": 0, "ResultDesc": "The service was accepted successfully", "ThirdPartyTransID": "1234567890"}';
+  //file is  one that watches the callback url to receive data from
+  //the mpesa api. It then writes the data to the log.text file.
 ?>

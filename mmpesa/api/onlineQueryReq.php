@@ -16,6 +16,6 @@ $mpesa = new mpesa1();
 $data = json_decode(file_get_contents("php://input"));
 $CheckoutRequestID = $data->CheckoutRequestID;
 $mpesa->online_query_req($CheckoutRequestID);
-    
-   
 
+//confirm a transaction that has already been performed.
+//checkout request id is found from the stk push method in class mpesa1
