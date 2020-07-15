@@ -27,24 +27,22 @@
         <div class="about-content">
           <div>
             <h2 class="hd"><u>FARE CHART</u></h2>
-            <table border="1"  width="100%";  height="200px">
+            <table border="1"  width="100%";  height="100px">
              <tr>
-              <th bgcolor="lightblue">Route ID</th>
+              <th bgcolor="lightblue">Route ID </th>
               <th bgcolor="lightblue">Bus ID</th>
 			  <th bgcolor="lightblue">Departure Station</th>
 			  <th bgcolor="lightblue">Arrival Station</th>
-              <th bgcolor="lightblue">Departure time</th>
-              <th bgcolor="lightblue">Arrival time</th>
-              <th bgcolor="lightblue">Day</th>
-              <th bgcolor="lightblue">Price</th>
-              <th bgcolor="lightblue">County</th>
+			  <th bgcolor="lightblue">Departure Time</th>
+              <th bgcolor="lightblue">Amount</th>
+			  <th bgcolor="lightblue">Status</th>
              </tr>
              
 <?php
 $host = "localhost";
         $user = "root";
         $pwd = "";
-		$db = "brt";
+		$db = "transit";
 
 $con= new mysqli ($host, $user, $pwd, $db);
 
@@ -54,13 +52,13 @@ die ("Connection failed:". $con->connect_error);
 }else {
 //echo "Connected successfully <br />";
 }
-$sql = "SELECT route_id,bus_id,departure_station,arrival_station,departure_time,arrival_time,day,price,county from chart";
+$sql = "SELECT route_id,bus_id,departure_station,arrival_station,departure_time,amount,status from chart";
 
 $result =$con-> query($sql);
 
 if ($result -> num_rows > 0) {
 while ($row = $result -> fetch_assoc()) {
-echo "<tr><td>". $row["route_id"] ."</td><td>". $row["bus_id"] . "</td><td>".  $row["departure_station"] . "</td><td>". $row["arrival_station"] . "</td><td>". $row["departure_time"] . "</td><td>". $row["arrival_time"] . "</td><td>". $row["day"]. "</td><td>". $row["price"]."</td><td>". $row["county"]. "</td></tr>" ;
+echo "<tr><td>". $row["route_id"] ."</td><td>". $row["bus_id"] . "</td><td>".  $row["departure_station"] . "</td><td>". $row["arrival_station"] . "</td><td>". $row["departure_time"] . "</td><td>". $row["amount"] . "</td><td>". $row["status"] . "</td></tr>" ;
 }
 //echo"0 result";
 }

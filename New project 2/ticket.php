@@ -42,31 +42,41 @@
 					  </p>
 					  
 					  <p>
-					  Last Name:
-					  <input type="text" name="lastname" required>
+					  Last Name :
+					  <input type="text" name="lname" required>
 					  </p>
 					  
 					  <p>
-					  First Name:
-					  <input type="text" name="firstname" required>
+					  First Name :
+					  <input type="text" name="fname" required>
 					  </p>
 					  
 					  <p>
-					  Middle Name:
-					  <input type="text" name="middlename" required>
+					  ID Number :
+					  <input type="int" name="id_number" required>
 					  </p>
 					  
 					  <p>
 					  Phone Number:
-					  <input type="int" name="phone_no" required>
+					  <input type="int" name="phoneNumber" required>
 					  </p>
 					  
 					  <p>
-					  E-mail Address:
-					  <input type="varchar" name="e_mail" required>
+					  Date :
+					  <input type="date" name="date" required>
 					  </p>
 					  
-					  <p><a href="mpesa1.php"><input name="submit" type="submit" id="submit_btn" value="Buy ticket"/><br></p>
+					  <p>
+					  Amount:
+					  <input type="int" name="amount" required>
+					  </p>
+					  
+					  
+					  
+					  
+					  
+					  <p><a href="mpesa2.php"><input name="submit" type="submit" id="submit_btn" value="Buy ticket"/><br></p>
+					  <p> <a href="fare charts.php"><input type="button" id="back_btn" value="Back"/></a></p>
 							
 					</form>
 		  </div>
