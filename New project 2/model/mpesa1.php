@@ -93,7 +93,7 @@ function stk(string $phoneNumber, string $stkAmount){
 
         //If Successful we save the checkout ID which will be used to confirm safaricom Mpesa Response
         if($ResponseCode=='0'){
-            echo $curl_response;
+            return $curl_response;
 
             // data in the following formart
             // {

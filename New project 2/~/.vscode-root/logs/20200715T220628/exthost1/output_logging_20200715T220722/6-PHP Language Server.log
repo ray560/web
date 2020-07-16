@@ -1,0 +1,33 @@
+DEBUG     Checking PHPLS_ALLOW_XDEBUG
+DEBUG     The xdebug extension is not loaded
+
+[Info  - 10:07:27 PM] 13 files total
+[Info  - 10:07:27 PM] Indexing project for definitions and static references
+Parsing file:///var/www/chuna/config/Database.php
+Parsing file:///var/www/chuna/models/post.php
+Parsing file:///var/www/chuna/models/Post.php
+Parsing file:///var/www/chuna/api/post/deleteCompany.php
+Parsing file:///var/www/chuna/api/post/companydetails.php
+Parsing file:///var/www/chuna/api/post/addShareholder.php
+Parsing file:///var/www/chuna/api/post/delete.php
+Parsing file:///var/www/chuna/api/post/deleteShareholder.php
+Parsing file:///var/www/chuna/api/post/create.php
+Parsing file:///var/www/chuna/api/post/createCompany.php
+Parsing file:///var/www/chuna/api/post/update.php
+Parsing file:///var/www/chuna/api/post/read.php
+Parsing file:///var/www/chuna/api/post/updateCompany.php
+[Info  - 10:07:27 PM] Indexing project for dynamic references
+Parsing file:///var/www/chuna/models/post.php
+Parsing file:///var/www/chuna/models/Post.php
+Parsing file:///var/www/chuna/api/post/deleteCompany.php
+Parsing file:///var/www/chuna/api/post/companydetails.php
+Parsing file:///var/www/chuna/api/post/addShareholder.php
+Parsing file:///var/www/chuna/api/post/delete.php
+Parsing file:///var/www/chuna/api/post/deleteShareholder.php
+Parsing file:///var/www/chuna/api/post/create.php
+Parsing file:///var/www/chuna/api/post/createCompany.php
+Parsing file:///var/www/chuna/api/post/update.php
+Parsing file:///var/www/chuna/api/post/read.php
+Parsing file:///var/www/chuna/api/post/updateCompany.php
+[Info  - 10:07:28 PM] 0 Packages
+[Info  - 10:07:28 PM] All 13 PHP files parsed in 0 seconds. 170 MiB allocated.

@@ -1,0 +1,5 @@
+[2020-07-15 22:06:35.057] [sharedprocess] [info] main {"machineId":"e9425b0bd7dd2dfb15e64e12479d7a9b872d3374d9465d76a71f6c072c3eba11","windowId":2}
+[2020-07-15 22:06:35.376] [sharedprocess] [error] [File Watcher (node.js)] Error: ENOENT: no such file or directory, stat '/var/www/web/New project 2/~/.vscode-root/User/snippets'
+[2020-07-15 22:07:15.076] [sharedprocess] [info] Starting to clean up unused language packs.
+[2020-07-15 22:07:17.938] [sharedprocess] [error] Error: XHR failed
+    at XMLHttpRequest.o.onerror (file:///snap/code/37/usr/share/code/resources/app/out/vs/code/electron-browser/sharedProcess/sharedProcessMain.js:183:274)

@@ -1,0 +1,114 @@
+Looking for git in: git
+Using git 2.20.1 from git
+> git rev-parse --show-toplevel
+> git rev-parse --git-dir
+Open repository: /var/www/chuna
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse master
+> git rev-parse --symbolic-full-name master@{u}
+> git rev-list --left-right master...refs/remotes/origin/master
+> git for-each-ref --sort -committerdate --format %(refname) %(objectname)
+> git remote --verbose
+> git config --get commit.template
+> git check-ignore -v -z --stdin
+> git show --textconv :config/Database.php
+> git ls-files --stage -- /var/www/chuna/config/Database.php
+> git cat-file -s 1b4409561ac32308ed004932b9b39fb25fd9ea25
+> git show --textconv :models/post.php
+> git ls-files --stage -- /var/www/chuna/models/post.php
+> git cat-file -s 161e2eddc1e1dfdca7157f67d904660226fa8185
+> git show --textconv :config/Database.php
+> git ls-files --stage -- /var/www/chuna/config/Database.php
+> git cat-file -s 1b4409561ac32308ed004932b9b39fb25fd9ea25
+> git show --textconv :models/post.php
+> git ls-files --stage -- /var/www/chuna/models/post.php
+> git cat-file -s 161e2eddc1e1dfdca7157f67d904660226fa8185
+> git show --textconv :models/Post.php
+> git ls-files --stage -- /var/www/chuna/models/Post.php
+> git cat-file -s 84ba53954e5ac71396082b32e90cbc08a7490eae
+> git show --textconv :models/post.php
+> git ls-files --stage -- /var/www/chuna/models/post.php
+> git cat-file -s 161e2eddc1e1dfdca7157f67d904660226fa8185
+> git show --textconv :config/Database.php
+> git ls-files --stage -- /var/www/chuna/config/Database.php
+> git cat-file -s 1b4409561ac32308ed004932b9b39fb25fd9ea25
+> git show --textconv :models/post.php
+> git ls-files --stage -- /var/www/chuna/models/post.php
+> git cat-file -s 161e2eddc1e1dfdca7157f67d904660226fa8185
+> git check-ignore -v -z --stdin
+> git show --textconv :api/post/read.php
+> git ls-files --stage -- /var/www/chuna/api/post/read.php
+> git cat-file -s fb97adef76ce222ed352c3a1cf0de76ee7306447
+> git show --textconv :config/Database.php
+> git ls-files --stage -- /var/www/chuna/config/Database.php
+> git cat-file -s 1b4409561ac32308ed004932b9b39fb25fd9ea25
+> git show --textconv :models/post.php
+> git ls-files --stage -- /var/www/chuna/models/post.php
+> git cat-file -s 161e2eddc1e1dfdca7157f67d904660226fa8185
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse master
+> git rev-parse --symbolic-full-name master@{u}
+> git rev-list --left-right master...refs/remotes/origin/master
+> git for-each-ref --sort -committerdate --format %(refname) %(objectname)
+> git remote --verbose
+> git config --get commit.template
+> git show --textconv :api/post/read.php
+> git ls-files --stage -- /var/www/chuna/api/post/read.php
+> git cat-file -s fb97adef76ce222ed352c3a1cf0de76ee7306447
+> git show --textconv :api/post/deleteCompany.php
+> git ls-files --stage -- /var/www/chuna/api/post/deleteCompany.php
+> git cat-file -s e90847a35da78b9b56f5acc31588231ee8bd38bf
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse master
+> git rev-parse --symbolic-full-name master@{u}
+> git rev-list --left-right master...refs/remotes/origin/master
+> git for-each-ref --sort -committerdate --format %(refname) %(objectname)
+> git remote --verbose
+> git config --get commit.template
+> git show --textconv :config/Database.php
+> git ls-files --stage -- /var/www/chuna/config/Database.php
+> git cat-file -s 1b4409561ac32308ed004932b9b39fb25fd9ea25
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse master
+> git rev-parse --symbolic-full-name master@{u}
+> git rev-list --left-right master...refs/remotes/origin/master
+> git for-each-ref --sort -committerdate --format %(refname) %(objectname)
+> git remote --verbose
+> git config --get commit.template
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse master
+> git rev-parse --symbolic-full-name master@{u}
+> git rev-list --left-right master...refs/remotes/origin/master
+> git for-each-ref --sort -committerdate --format %(refname) %(objectname)
+> git remote --verbose
+> git config --get commit.template
+> git show --textconv :models/post.php
+> git ls-files --stage -- /var/www/chuna/models/post.php
+> git cat-file -s 161e2eddc1e1dfdca7157f67d904660226fa8185
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse master
+> git rev-parse --symbolic-full-name master@{u}
+> git rev-list --left-right master...refs/remotes/origin/master
+> git for-each-ref --sort -committerdate --format %(refname) %(objectname)
+> git remote --verbose
+> git config --get commit.template
+> git show --textconv :api/post/deleteCompany.php
+> git ls-files --stage -- /var/www/chuna/api/post/deleteCompany.php
+> git cat-file -s e90847a35da78b9b56f5acc31588231ee8bd38bf
+> git show --textconv :models/post.php
+> git ls-files --stage -- /var/www/chuna/models/post.php
+> git cat-file -s 161e2eddc1e1dfdca7157f67d904660226fa8185
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse master
+> git rev-parse --symbolic-full-name master@{u}
+> git rev-list --left-right master...refs/remotes/origin/master
+> git for-each-ref --sort -committerdate --format %(refname) %(objectname)
+> git remote --verbose
+> git config --get commit.template

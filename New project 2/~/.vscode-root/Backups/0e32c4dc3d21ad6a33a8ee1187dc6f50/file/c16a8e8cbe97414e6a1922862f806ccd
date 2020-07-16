@@ -1,0 +1,1956 @@
+file:///var/www/chuna/models/post.php {"mtime":1594863967618,"ctime":1593859563117,"size":92865,"etag":"35d6rjkb633jk","orphaned":false}
+<?php
+class post{
+
+    //database
+    private $conn;
+
+
+    //constructor
+    public function __construct($db) {
+        $this->conn = $db;
+    }
+
+    private $companyTable = 'COMPANY';
+    private $companyProfilesTable = 'COMPANY_PROFILES';
+
+     //=================================================================>>Get documents
+
+     public function read(){
+        //database query
+        $query =  'SELECT
+            c.OUR_REF,
+            c.telephone,
+            c.email,
+            c.fax,
+            c.address,
+            m.YOUR_REF,
+            m.ordered_by,
+            m.inquiry_date,
+            m.info_valid_on  as  information_valid_on,
+            m.report_type,
+            m.report,
+            m.exchange_rate,
+            m.currency,
+            p.company_name
+            
+           
+        FROM
+            '. $this->companyProfilesTable.' c
+        LEFT JOIN
+            DOCUMENT m ON c.OUR_REF = m.COMPANY_PROFILES_OUR_REF
+        LEFT JOIN
+            COMPANY p ON m.YOUR_REF = p.DOCUMENT_YOUR_REF';
+        //Prepared statement
+        $stmt = $this->conn->prepare($query);
+        //execute query
+        $stmt->execute();
+
+        return $stmt;
+    }
+    //=================================================================>> end of read all documents
+ 
+     //post properties from company
+     public $company_name;
+     public $establishment_date;
+     public $registration;
+     public $vat_number;
+     public $legal_form;
+     public $stock_listing;
+     public $credit_opinion;
+     public $cooperate_credit_rating;
+     public $history;
+     public $activities;
+     public $identification; // added
+
+     //post properties from COMPANY_BUSINESS
+    //contains foreign key from company, COMPANY_company_name
+    public $suppliers;
+    public $recent_sales;
+    public $exports;
+    public $export_ratio;
+    public $domestic_market_share;
+    public $business_premises;
+    public $type_of_occupation;
+    public $location;
+    public $main_banks;
+    public $payment_morale;
+    public $credit_rating;
+    public $customers;
+    public $imports;
+    public $import_ratio;
+    public $premises_used_as;
+
+     //arrays
+     public $b_data;
+     public $interview_details;
+     public $s_holders = array();
+     public $c_directors = array();
+     public $aff_companies = array();
+     public $subsid_companies= array();
+     public $profile;
+     public $terms_of_payment;
+
+    //=================================================================>> end of read single company
+    public function readCompanyDetails(){
+            //database query
+            $query = 'SELECT 
+                p.company_name,
+                c.address,
+                c.telephone as tel,
+                c.fax,
+                c.email as company_email,
+                c.internet,
+                p.establishment_date,
+                p.vat_number,
+                p.registration,
+                p.legal_form,
+                p.stock_listing,
+                p.cooperate_credit_rating,
+                p.credit_opinion,
+                p.activities,
+                p.nationalId as identification,
+                p.history,
+                p.DOCUMENT_YOUR_REF,
+                offices.headoffices,
+                offices.branches,
+                prof.nominal_capital,
+                prof.paid_in_capital,
+                prof.subscribed_capital,
+                cb.suppliers,
+                cb.customers,
+                cb.recent_sales,
+                cb.exports,
+                cb.imports,
+                cb.export_ratio,
+                cb.import_ratio,
+                cb.domestic_market_share,
+                cb.business_premises,
+                cb.premises_used_as,
+                cb.type_of_occupation,
+                cb.location,
+                cb.main_banks,
+                cb.payment_morale,
+                cb.credit_rating,
+                i.interviewee_name,
+                i.designation,
+                i.date_of_contact,
+                t.buying_terms_cash,
+                t.buying_terms_credit,
+                t.selling_terms_cash,
+                t.selling_terms_credit
+            FROM 
+                ' . $this->companyTable . ' p
+                INNER JOIN
+                    CONTACTS c ON p.company_name = c.COMPANY_company_name
+                INNER JOIN
+                    OFFICES_FACTORIES offices ON p.company_name = offices.COMPANY_company_name
+                INNER JOIN
+                    PROFILE prof ON p.company_name = prof.COMPANY_company_name
+                LEFT JOIN
+                    COMPANY_BUSINESS cb ON p.company_name = cb.COMPANY_company_name
+                LEFT JOIN
+                    INTERVIEW_DETAILS i ON p.company_name = i.COMPANY_company_name
+                LEFT JOIN
+                    TERMS_OF_PAYMENT t ON p.company_name = t.COMPANY_company_name
+                WHERE 
+                    p.DOCUMENT_YOUR_REF = ?';
+            
+            //prepare statement
+            $stmt = $this->conn->prepare($query);
+
+            //bind ID
+            $stmt->bindParam(1, $this->YOUR_REF);
+
+            //execute query
+            try{
+            $stmt->execute();
+            }catch(PDOException $e){
+                printf("Error: %s" , $e->getMessage());
+
+            }
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            extract($row);
+
+            
+            //set properties
+            
+            $this->company_name =$row['company_name'];
+            $this->address =$row['address'];
+            $this->tel =$row['tel'];
+            $this->fax =$row['fax'];
+            $this->company_email =$row['company_email'];
+            $this->internet =$row['internet'];
+            $this->establishment_date =$row['establishment_date'];
+            $this->vat_number =$row['vat_number'];
+            $this->registration =$row['registration'];
+            $this->legal_form =$row['legal_form'];
+            $this->stock_listing =$row['stock_listing'];
+            $this->cooperate_credit_rating =$row['cooperate_credit_rating'];
+            $this->credit_opinion =$row['credit_opinion'];
+            $this->headoffices =$row['headoffices'];
+            $this->branches =$row['branches'];
+            $this->history =$row['history'];
+            $this->nominal_capital =$row['nominal_capital'];
+            $this->paid_in_capital =$row['paid_in_capital'];
+            $this->subscribed_capital =$row['subscribed_capital'];
+            $this->activities = $row['activities'];
+            $this->identification = $row['identification'];
+            $this->profile = array(
+               'nominal_capital'  =>$row['nominal_capital'],
+                'paid_in_capital'  =>$row['paid_in_capital'],
+                'subscribed_capital'  =>$row['subscribed_capital']
+            );
+            $this->interview_details = array(
+                'interviewee_name' => $row['interviewee_name'],
+                'designation' => $row['designation'],
+                'date_of_contact' => $row['date_of_contact']
+            );
+
+            $this->terms_of_payment= array(
+                'buying_terms_cash' => $row['buying_terms_cash'],
+                'buying_terms_credit' => $row['buying_terms_credit'],
+                'selling_terms_cash' => $row['selling_terms_cash'],
+                'selling_terms_credit' => $row['selling_terms_credit']
+            );
+
+            $this->b_data = array(
+                'suppliers'  => $row['suppliers'],
+                'customers'  => $row['customers'],
+                'recent_sales'  => $row['recent_sales'],
+                'exports'  => $row['exports'],
+                'export_ratio'  => $row['export_ratio'],
+                'imports'  => $row['imports'],
+                'import_ratio'  => $row['import_ratio'],
+                'domestic_market_share' => $row ['domestic_market_share'],
+                'business_premises' => $row ['business_premises'],
+                'type_of_occupation'  => $row['type_of_occupation'],
+                'location' => $row ['location'],
+                'premises_used_as'  => $row['premises_used_as'],
+                'main_banks' => $row ['main_banks'],
+                'payment_morale'  => $row['payment_morale'],
+                'credit_rating'  => $row['credit_rating']
+            );
+
+            //------------------------get share holders
+                    $query = 'SELECT 
+                            p.company_name,
+                            p.DOCUMENT_YOUR_REF,
+                            sh.name,
+                            sh.position,
+                            sh.amount,
+                            sh.ratio
+                    FROM
+                    ' . $this->companyTable . ' p
+                    INNER JOIN
+                        SHAREHOLDERS sh ON p.company_name = sh.COMPANY_company_name
+                    WHERE 
+                        p.DOCUMENT_YOUR_REF = ?';
+
+                        //prepare statement
+                        $stmt = $this->conn->prepare($query);
+
+                        //bind ID
+                        $stmt->bindParam(1, $this->YOUR_REF);
+
+                        //execute query
+                        try{
+                            $stmt->execute();
+                        }catch(PDOException $e){
+                                printf("Error: %s" , $e->getMessage());
+                
+                        }
+
+                        while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+                            extract($row);
+                            $post_sh_item = array(
+                                'name' => $name,
+                                'position' => $position,
+                                'ordered_by' => $ordered_by,
+                                'ratio' => $ratio
+                            );
+                            //push to the data after each loop
+                            array_push($this->s_holders, $post_sh_item);
+                        }
+
+            //-------------------------
+
+            //==========================get directors
+                    $query = 'SELECT 
+                            p.company_name,
+                            p.DOCUMENT_YOUR_REF,
+                            sh.name as directorName,
+                            sh.position,
+                            director.isactive as Isactive,
+                            director.title,
+                            director.SHAREHOLDERS_id,
+                            director.education,
+                            director.country,
+                            director.remarks
+                        FROM
+                            ' . $this->companyTable . ' p
+                            
+                            LEFT JOIN
+                                DIRECTORS director ON p.company_name = director.COMPANY_company_name
+                            LEFT JOIN 
+                                SHAREHOLDERS sh ON director.SHAREHOLDERS_id = sh.id
+                            WHERE 
+                                p.DOCUMENT_YOUR_REF = ?';
+                            //prepare statement
+                        $stmt = $this->conn->prepare($query);
+
+                        //bind ID
+                        $stmt->bindParam(1, $this->YOUR_REF);
+
+                        //execute query
+                        try{
+                            $stmt->execute();
+                        }catch(PDOException $e){
+                                printf("Error: %s" , $e->getMessage());
+                
+                        }
+
+                        while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+                            extract($row);
+                            $post_dir_item = array(
+                                'name' => $directorName,
+                                'position' => $position,
+                                'Isactive' => $Isactive,
+                                'title' => $title,
+                                'education' => $education,
+                                'country' => $country,
+                                'remarks' => $remarks,
+                                'SHAREHOLDERS_id' => $SHAREHOLDERS_id,
+                                'directorship' =>[] //initialize array for directorships
+                            );
+                           $post_dir_item['directorship'] = $this->getDirectorships($SHAREHOLDERS_id);
+                            //push to the data after each loop
+                            array_push($this->c_directors, $post_dir_item);
+                        }
+                        //fetching directorships
+                        
+                //================end of directors
+            
+                //##########################affilliated and subsidiary companies########################
+                    $query = 'SELECT 
+                            m.company_name,
+                            m.type
+                        FROM
+                            ' . $this->companyTable . ' p
+                            RIGHT JOIN
+                                affiliated_and_subsidiary_companies m ON p.company_name = m.COMPANY_company_name
+                            WHERE 
+                                p.DOCUMENT_YOUR_REF = ?';
+                            //prepare statement
+                        $stmt = $this->conn->prepare($query);
+                
+                        //bind ID
+                        $stmt->bindParam(1, $this->YOUR_REF);
+                
+                        //execute query
+                        try{
+                            $stmt->execute();
+                        }catch(PDOException $e){
+                                printf("Error: %s" , $e->getMessage());
+                
+                        }
+                
+                        while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+                            extract($row);
+                            //push to the data after each loop, in the appropriate array
+                            if($type == "subsidiary"){
+                                array_push($this->subsid_companies, $company_name);
+                            }else{
+                                array_push($this->aff_companies, $company_name);
+                            }
+                        
+                        
+                        }
+                //##########################affilliated companies########################
+    }
+
+    #################################################getting directorships
+    private  function getDirectorships($SHAREHOLDERS_id){
+        $query = 'SELECT 
+                            p.company_name
+                        FROM
+                            DIRECTORSHIPS p
+                        WHERE 
+                            p.SHAREHOLDERS_id  = ?';
+                        //prepare statement
+                        $stmt = $this->conn->prepare($query);
+
+                        //bind ID
+                        $stmt->bindParam(1, $SHAREHOLDERS_id);
+
+                        //execute query
+                        try{
+                            $stmt->execute();
+                        }catch(PDOException $e){
+                                printf("Error: %s" , $e->getMessage());
+                
+                        }
+                        $directorships = array();
+                        while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+                            extract($row);
+                            array_push($directorships, $company_name );
+                        }
+
+                        return $directorships;
+    }
+            ##################################################getting directorships
+
+
+    public function fetchDataFromBalance_sheets(){
+        $balanceSheets = array( );
+        $balanceSheets['assets']=array(); 
+        $balanceSheets['noncurrent_assets']=array();
+        $balanceSheets['equity_liabilities']=array();
+        $balanceSheets['capital_reserves']=array();
+        $balanceSheets['noncurrent_liabilities']=array();
+        //database query
+        $query = 'SELECT
+            t.period_id,
+            t.period_id,
+            t.id as item_id,
+            t.type,
+            t.description,
+            t.period1 as amount1,
+            t.period2 as amount2,
+            t.period3 as amount3,
+            sum(case when t.type = "asset" then t.period1 end) as asset_sum_period1,
+            sum(case when t.type = "asset" then t.period2 end) as asset_sum_period2,
+            sum(case when t.type = "asset" then t.period3 end) as asset_sum_period3,
+            sum(case when t.type = "non_current_asset" then t.period1 end) as non_current_asset_sum_period1,
+            sum(case when t.type = "non_current_asset" then t.period2 end) as non_current_asset_sum_period2,
+            sum(case when t.type = "non_current_asset" then t.period3 end) as non_current_asset_sum_period3,
+            sum(case when t.type = "capital_and_reserves" then t.period1 end) as capital_and_reserves_sum_period1,
+            sum(case when t.type = "capital_and_reserves" then t.period2 end) as capital_and_reserves_sum_period2,
+            sum(case when t.type = "capital_and_reserves" then t.period3 end) as capital_and_reserves_sum_period3,
+            sum(case when t.type = "equity_and_liabilities" then t.period1 end) as equity_and_liabilities_sum_period1,
+            sum(case when t.type = "equity_and_liabilities" then t.period2 end) as equity_and_liabilities_sum_period2,
+            sum(case when t.type = "equity_and_liabilities" then t.period3 end) as equity_and_liabilities_sum_period3,
+            sum(case when t.type = "non_current_liabilities" then t.period1 end) as non_current_liabilities_sum_period1,
+            sum(case when t.type = "non_current_liabilities" then t.period2 end) as non_current_liabilities_sum_period2,
+            sum(case when t.type = "non_current_liabilities" then t.period3 end) as non_current_liabilities_sum_period3
+        FROM
+            ' . $this->companyTable . ' p 
+        LEFT JOIN
+            period d ON p.company_name = d.COMPANY_company_name
+        LEFT JOIN
+            balance_sheets t ON d.id = t.period_id
+        WHERE 
+            p.DOCUMENT_YOUR_REF = ?
+        GROUP BY t.id
+        
+        ';
+        //prepare statement
+        $stmt = $this->conn->prepare($query);
+
+        //bind ID
+        $stmt->bindParam(1, $this->YOUR_REF);
+
+        //execute query
+        try{
+            $stmt->execute();
+        }catch(PDOException $e){
+            printf("Error: %s" , $e->getMessage());
+                
+        }
+
+         //initialize the arrays to receive data
+         $assets = array();
+         $noncurrent_assets = array();
+         $equity_liabilities = array();
+         $capital_reserves = array();
+         $noncurrent_liabilities = array();
+
+        while($row =  $stmt->fetch(PDO::FETCH_ASSOC)){
+            extract($row);
+            switch($type){
+                case "asset":
+                    $assets['total assets'] = array(
+                        'period1' => $asset_sum_period1,
+                        'period2' => $asset_sum_period2,
+                        'period3' => $asset_sum_period3
+                    );
+                    array_push( $assets,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+                break; 
+                case "non_current_asset": 
+                            $noncurrent_assets['total non_current_assets'] = array(
+                                'period1' => $non_current_asset_sum_period1,
+                                'period2' => $non_current_asset_sum_period2,
+                                'period3' => $non_current_asset_sum_period3
+                            );
+
+                    array_push( $noncurrent_assets,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+                break;
+                case "non_current_liabilities": 
+                            $noncurrent_liabilities['total non_current_liabilities'] = array(
+                                'period1' =>$non_current_liabilities_sum_period1,
+                                'period2' =>$non_current_liabilities_sum_period2 ,
+                                'period3' =>$non_current_liabilities_sum_period3 
+                            );
+                    array_push( $noncurrent_liabilities,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+                break;
+                case "capital_and_reserves": 
+                            $capital_reserves['total capital_and_reserves'] = array(
+                                'period1' =>$capital_and_reserves_sum_period1,
+                                'period2' =>$capital_and_reserves_sum_period2 ,
+                                'period3' =>$capital_and_reserves_sum_period3
+                            );
+                    array_push( $capital_reserves,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+                break;
+                case "equity_and_liabilities": 
+                            $equity_liabilities['total equity_and_liabilities'] = array(
+                                'period1' =>$equity_and_liabilities_sum_period1 ,
+                                'period2' =>$equity_and_liabilities_sum_period2 ,
+                                'period3' =>$equity_and_liabilities_sum_period3 
+                            );
+                    array_push( $equity_liabilities,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+                break;
+                default:
+            break;
+
+            }
+
+        }
+
+        array_push( $balanceSheets['assets'], $assets);
+        array_push( $balanceSheets['noncurrent_assets'],  $noncurrent_assets );
+        array_push( $balanceSheets['equity_liabilities'],  $equity_liabilities);
+        array_push( $balanceSheets['capital_reserves'], $capital_reserves);
+        array_push( $balanceSheets['noncurrent_liabilities'], $noncurrent_liabilities );
+
+        return $balanceSheets;
+
+    }
+    
+    public function getPeriod(){
+        $cashflow = array();
+        //database query
+        $query = 'SELECT
+            d.id,
+            d.period1,
+            d.period2,
+            d.period3
+        FROM
+            ' . $this->companyTable . ' p 
+        LEFT JOIN
+            period d ON p.company_name = d.COMPANY_company_name
+        WHERE 
+            p.DOCUMENT_YOUR_REF = ?
+        ';
+        //prepare statement
+         $stmt = $this->conn->prepare($query);
+    
+        //bind ID
+        $stmt->bindParam(1, $this->YOUR_REF);
+    
+        //execute query
+        try{
+            $stmt->execute();
+        }catch(PDOException $e){
+            printf("Error: %s" , $e->getMessage());
+                    
+        }
+        while($row =  $stmt->fetch(PDO::FETCH_ASSOC)){
+            extract($row);
+            $period = array();
+            //set properties
+            array_push($period,array(
+                'id'=>$id,
+                'period1' => $period1,
+                'period2' => $period2,
+                'period3' => $period3
+            ));
+        }
+        return $period;
+    
+    }
+    public function fetchDataFromIncome_statements(){
+        $income_statements = array();
+        //database query
+
+        $query = 'SELECT
+            t.period_id,
+            t.id as item_id,
+            t.type,
+            t.description,
+            t.period1 as amount1,
+            t.period2 as amount2,
+            t.period3 as amount3,
+            /*
+            total revenue
+            */
+            sum(case when t.period1 is not null and t.type = "revenue" then t.period1 else 0 end) as total_revenue_period1,
+            sum(case when t.period2 is not null and t.type = "revenue" then t.period2 else 0 end) as total_revenue_period2,
+            sum(case when t.period3 is not null and t.type = "revenue" then t.period3 else 0 end) as total_revenue_period3,
+            /*
+            total cost of sales
+            */
+            sum(case when t.period1 is not null and t.type = "cost_of_sales" then t.period1 else 0 end) as total_cost_of_sales_period1,
+            sum(case when t.period2 is not null and t.type = "cost_of_sales" then t.period2 else 0 end) as total_cost_of_sales_period2,
+            sum(case when t.period3 is not null and t.type = "cost_of_sales" then t.period3 else 0 end) as total_cost_of_sales_period3,
+            /*
+            gross profit  = total revenue - cost of sales
+            */
+            (sum(case when t.period1 is not null and t.type = "revenue" then t.period1 else 0 end))-(sum(case when t.period1 is not null and t.type = "cost_of_sales" then t.period1 else 0 end)) as gross_profit_period1,
+            (sum(case when t.period2 is not null and t.type = "revenue" then t.period2 else 0 end))-(sum(case when t.period2 is not null and t.type = "cost_of_sales" then t.period2 else 0 end)) as gross_profit_period2,
+            (sum(case when t.period3 is not null and t.type = "revenue" then t.period3 else 0 end))-(sum(case when t.period3 is not null and t.type = "cost_of_sales" then t.period3 else 0 end)) as gross_profit_period3,
+            /*
+            total expenses
+            */
+            sum(case when t.period1 is not null and t.type = "expenses" then t.period1 else 0 end) as expenses_sum_period1,
+            sum(case when t.period2 is not null and t.type = "expenses" then t.period2 else 0 end) as expenses_sum_period2,
+            sum(case when t.period3 is not null and t.type = "expenses" then t.period3 else 0 end) as expenses_sum_period3,
+            /* 
+                operating profit = total revenue - total cost of sales -total expenses - total loss
+                operating profit = gross profit - total expenses - total loss 
+            */
+            ((sum(case when t.period1 is not null and t.type = "revenue" then t.period1 else 0 end))-(sum(case when t.period1 is not null and t.type = "cost_of_sales" then t.period1 else 0 end))-(sum(case when t.period1 is not null and t.type = "expenses" then t.period1 else 0 end)+sum(case when t.period1 is not null and t.type = "loss" then t.period1 else 0 end))) as operating_profit_period1,
+            ((sum(case when t.period2 is not null and t.type = "revenue" then t.period2 else 0 end))-(sum(case when t.period2 is not null and t.type = "cost_of_sales" then t.period2 else 0 end))-(sum(case when t.period2 is not null and t.type = "expenses" then t.period2 else 0 end)+sum(case when t.period2 is not null and t.type = "loss" then t.period2 else 0 end))) as operating_profit_period2,
+            ((sum(case when t.period3 is not null and t.type = "revenue" then t.period3 else 0 end))-(sum(case when t.period3 is not null and t.type = "cost_of_sales" then t.period3 else 0 end))-(sum(case when t.period3 is not null and t.type = "expenses" then t.period3 else 0 end)+sum(case when t.period3 is not null and t.type = "loss" then t.period3 else 0 end))) as operating_profit_period3,
+           /*
+            total operating profit = total revenue - total cost of sales -total expenses - total loss + other income - profit expenses.
+            total operating profit = operating profit + other income - profit expenses
+            same as profit befor tax
+            profit expenses i.e. finance costs, e.t.c.
+            */
+            ((sum(case when t.period1 is not null and t.type = "other_income" then t.period1 else 0 end))+(sum(case when t.period1 is not null and t.type = "revenue" then t.period1 else 0 end))-(sum(case when t.period1 is not null and t.type = "profit_expense" then t.period1 else 0 end))-(sum(case when t.period1 is not null and t.type = "cost_of_sales" then t.period1 else 0 end))-(sum(case when t.period1 is not null and t.type = "expenses" then t.period1 else 0 end)+sum(case when t.period1 is not null and t.type = "loss" then t.period1 else 0 end))) as profit_before_tax_period1,
+            ((sum(case when t.period2 is not null and t.type = "other_income" then t.period2 else 0 end))+(sum(case when t.period2 is not null and t.type = "revenue" then t.period2 else 0 end))-(sum(case when t.period2 is not null and t.type = "profit_expense" then t.period2 else 0 end))-(sum(case when t.period2 is not null and t.type = "cost_of_sales" then t.period2 else 0 end))-(sum(case when t.period2 is not null and t.type = "expenses" then t.period2 else 0 end)+sum(case when t.period2 is not null and t.type = "loss" then t.period2 else 0 end))) as profit_before_tax_period2,
+            ((sum(case when t.period3 is not null and t.type = "other_income" then t.period3 else 0 end))+(sum(case when t.period3 is not null and t.type = "revenue" then t.period3 else 0 end))-(sum(case when t.period3 is not null and t.type = "profit_expense" then t.period3 else 0 end))-(sum(case when t.period3 is not null and t.type = "cost_of_sales" then t.period3 else 0 end))-(sum(case when t.period3 is not null and t.type = "expenses" then t.period3 else 0 end)+sum(case when t.period3 is not null and t.type = "loss" then t.period3 else 0 end))) as profit_before_tax_period3,
+           /*
+            net profit = total revenue - total cost of sales -total expenses - total loss + other income - profit expenses - taxation.
+            net profit = total operating profit - taxation
+            */
+            ((sum(case when t.period1 is not null and t.type = "other_income" then t.period1 else 0 end))-(sum(case when t.period1 is not null and t.type = "taxation" then t.period1 else 0 end))+(sum(case when t.period1 is not null and t.type = "revenue" then t.period1 else 0 end))-(sum(case when t.period1 is not null and t.type = "profit_expense" then t.period1 else 0 end))-(sum(case when t.period1 is not null and t.type = "cost_of_sales" then t.period1 else 0 end))-(sum(case when t.period1 is not null and t.type = "expenses" then t.period1 else 0 end)+sum(case when t.period1 is not null and t.type = "loss" then t.period1 else 0 end))) as net_profit_period1,
+            ((sum(case when t.period2 is not null and t.type = "other_income" then t.period2 else 0 end))-(sum(case when t.period2 is not null and t.type = "taxation" then t.period2 else 0 end))+(sum(case when t.period2 is not null and t.type = "revenue" then t.period2 else 0 end))-(sum(case when t.period2 is not null and t.type = "profit_expense" then t.period2 else 0 end))-(sum(case when t.period2 is not null and t.type = "cost_of_sales" then t.period2 else 0 end))-(sum(case when t.period2 is not null and t.type = "expenses" then t.period2 else 0 end)+sum(case when t.period2 is not null and t.type = "loss" then t.period2 else 0 end))) as net_profit_period2,
+            ((sum(case when t.period3 is not null and t.type = "other_income" then t.period3 else 0 end))-(sum(case when t.period3 is not null and t.type = "taxation" then t.period3 else 0 end))+(sum(case when t.period3 is not null and t.type = "revenue" then t.period3 else 0 end))-(sum(case when t.period3 is not null and t.type = "profit_expense" then t.period3 else 0 end))-(sum(case when t.period3 is not null and t.type = "cost_of_sales" then t.period3 else 0 end))-(sum(case when t.period3 is not null and t.type = "expenses" then t.period3 else 0 end)+sum(case when t.period3 is not null and t.type = "loss" then t.period3 else 0 end))) as net_profit_period3
+        FROM
+            ' . $this->companyTable . ' p 
+        LEFT JOIN
+            period d ON p.company_name = d.COMPANY_company_name
+        LEFT JOIN
+            income_statements t ON d.id = t.period_id
+        WHERE 
+            p.DOCUMENT_YOUR_REF = ?
+        GROUP BY t.id
+            
+        ';
+        //prepare statement
+        $stmt = $this->conn->prepare($query);
+    
+        //bind ID
+        $stmt->bindParam(1, $this->YOUR_REF);
+    
+        //execute query
+        try{
+            $stmt->execute();
+        }catch(PDOException $e){
+            printf("Error: %s" , $e->getMessage());
+                    
+        }
+    
+         //initialize the arrays to receive data
+         $revenue = array();
+         $cost_of_sales = array();
+         $expenses = array();
+         $loss = array();
+         $other_income = array();
+         $profit_expense = array();
+         $taxation = array();
+
+        $grossProfit= array();
+        $operatingProfit = array();
+        $profitBeforeTax =array();
+        $netProfit = array();
+        //putting data into respective arrays
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+            extract($row);
+            switch($type){
+                case "revenue":
+                    $revenue['total_revenue'] = array(
+                        'period1' =>$total_revenue_period1 ,
+                        'period2' =>$total_revenue_period2 ,
+                        'period3' =>$total_revenue_period3 
+                    );
+                    array_push( $revenue,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+                break; 
+                case "cost_of_sales":
+                    $cost_of_sales['total_cost_of_sales'] = array(
+                        'period1' =>$total_cost_of_sales_period1 ,
+                        'period2' =>$total_cost_of_sales_period2 ,
+                        'period3' =>$total_cost_of_sales_period3
+                    ); 
+                    array_push( $cost_of_sales,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+
+                break;
+                case "expenses": 
+                    $expenses['total_expenses'] = array(
+                        'period1' =>$expenses_sum_period1 ,
+                        'period2' =>$expenses_sum_period2 ,
+                        'period3' =>$expenses_sum_period3 
+                    );
+                    array_push( $expenses,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+
+                break;
+                case "loss": 
+                    array_push( $loss,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+                break;
+                case "other_income": 
+                    array_push( $other_income,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+                break;
+                case "profit_expense": 
+                    array_push( $profit_expense,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+                break;
+                case "taxation": 
+                    array_push( $taxation,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                        );
+                break;
+                default:
+            break;
+
+            }
+            $grossProfit = array(
+                'period1'=>$gross_profit_period1,
+                'period2'=>$gross_profit_period2,
+                'period3'=>$gross_profit_period3
+
+            );
+            $operatingProfit = array(
+                'period1'=>$operating_profit_period1,
+                'period2'=>$operating_profit_period2,
+                'period3'=>$operating_profit_period3
+                
+            );
+            $profitBeforeTax = array(
+                'period1'=>$profit_before_tax_period1,
+                'period2'=>$profit_before_tax_period2,
+                'period3'=>$profit_before_tax_period3
+                
+            );
+            $netProfit = array(
+                'period1'=>$net_profit_period1,
+                'period2'=>$net_profit_period2,
+                'period3'=>$net_profit_period3
+                
+            );
+            
+        }
+        $income_statements = array(
+            'revenue' => $revenue,
+            'cost_of_sales' => $cost_of_sales,
+            'gross_profit' => $grossProfit,
+            'expenses' => $expenses,
+            'loss' => $loss,
+            'operating_profit'=>$operatingProfit,
+            'other_income'=>$other_income,
+            'profit_expense'=>$profit_expense,
+            'profit_before_tax'=>$profitBeforeTax,
+            'taxation'=>$taxation,
+            'netProfit'=>$netProfit
+        );
+
+        return $income_statements;
+
+    }
+    public function fetchDataFromCashflow(){
+        $cashflow = array();
+        //database query
+        $query = 'SELECT
+            t.period_id,
+            t.id as item_id,
+            t.type,
+            t.description,
+            t.period1 as amount1,
+            t.period2 as amount2,
+            t.period3 as amount3,
+          
+            sum(case when  t.period1 is not null and t.type = "operating_activities" then t.period1 else 0 end) as operating_activities_sum_period1,
+            sum(case when  t.period2 is not null and t.type = "operating_activities" then t.period2 else 0 end) as operating_activities_sum_period2,
+            sum(case when  t.period3 is not null and t.type = "operating_activities" then t.period3 else 0 end) as operating_activities_sum_period3,
+            
+            sum(case when  t.period1 is not null and t.type = "financing_activities" then t.period1 else 0 end) as financing_activities_sum_period1,
+            sum(case when  t.period2 is not null and t.type = "financing_activities" then t.period2 else 0 end) as financing_activities_sum_period2,
+            sum(case when  t.period3 is not null and t.type = "financing_activities" then t.period3 else 0 end) as financing_activities_sum_period3,
+            sum(case when  t.period1 is not null and t.type = "investing_activities" then t.period1 else 0 end) as investing_activities_sum_period1,
+            sum(case when  t.period2 is not null and t.type = "investing_activities" then t.period2 else 0 end) as investing_activities_sum_period2,
+            sum(case when  t.period3 is not null and t.type = "investing_activities" then t.period3 else 0 end) as investing_activities_sum_period3
+        FROM
+            ' . $this->companyTable . ' p 
+        LEFT JOIN
+            period d ON p.company_name = d.COMPANY_company_name
+        LEFT JOIN
+            cashflow t ON d.id = t.period_id
+        WHERE 
+            p.DOCUMENT_YOUR_REF = ?
+        GROUP BY t.id
+        ';
+        //prepare statement
+         $stmt = $this->conn->prepare($query);
+    
+        //bind ID
+        $stmt->bindParam(1, $this->YOUR_REF);
+    
+        //execute query
+        try{
+            $stmt->execute();
+        }catch(PDOException $e){
+            printf("Error: %s" , $e->getMessage());
+                    
+        }
+    
+        //initialize the arrays to receive data
+         $operating_activities = array();
+         $financing_activities = array();
+         $investing_activities = array();
+        while($row =  $stmt->fetch(PDO::FETCH_ASSOC)){
+            extract($row);
+            switch($type){
+                case "operating_activities":
+                    $operating_activities['total_operating_activities'] = array(
+                        'period1' =>$operating_activities_sum_period1 ,
+                        'period2' =>$operating_activities_sum_period2 ,
+                        'period3' =>$operating_activities_sum_period3 
+                    );
+                    array_push( $operating_activities,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+                break; 
+                case "financing_activities": 
+                    $financing_activities['total_financing_activities'] = array(
+                        'period1' =>$financing_activities_sum_period1 ,
+                        'period2' =>$financing_activities_sum_period2 ,
+                        'period3' =>$financing_activities_sum_period3 
+                    );
+                    array_push( $financing_activities,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+
+                break;
+                case "investing_activities": 
+                    $investing_activities['total_investing_activities'] = array(
+                        'period1' =>$investing_activities_sum_period1 ,
+                        'period2' =>$investing_activities_sum_period2 ,
+                        'period3' =>$investing_activities_sum_period3 
+                    );
+                    array_push( $investing_activities,
+                                array(
+                                    'item_id'=>$item_id,
+                                    'description'=>$description,
+                                    'period1'=>$amount1,
+                                    'period2'=>$amount2,
+                                    'period3'=>$amount3
+                                    )
+                            );
+
+                break;
+                default:
+            break;
+            }
+            
+        }
+        $cashflow['operating_activities'] = $operating_activities;
+        $cashflow['financing_activities'] =$financing_activities;
+        $cashflow['investing_activities'] =$investing_activities;
+        return $cashflow;
+
+    }
+    public function getFinanceDetails(){
+            ##################################################getting income statement,
+            
+            ##################################################getting income statement,
+            ##################################################getting cashflow,
+            
+            ##################################################getting cashflow,
+            ##################################################getting balance sheets,
+            // $this->finance_data['balance_sheets'] = array(
+            //     ['asset'],
+            //     ['non_current_asset'],
+            //     ['liabilities'],
+            //     ['non_current_liabilities'],
+            //     ['capital_and_reserves'],
+            //     ['equity_and_liabilities'],
+            //     ['equity']
+            // );
+           
+            ##################################################getting balance sheets,
+
+    }
+
+            //post properties from company profiles
+        public $OUR_REF;
+        public $telephone;
+        public $email;
+        public $address;
+        public $fax;
+
+        //post profiles from document 
+        public $YOUR_REF;
+        public $ordered_by;
+        public $inquiry_date;
+        public $information_valid_on;
+        public $report_type;
+        public $report;
+        public $exchange_rate;
+        public $currency;
+
+
+   public function create(){
+       //begin a transaction
+       $this->conn->beginTransaction();
+       //create queries
+       $queryIntoCompanyProfiles = 'INSERT INTO ' .
+            $this->companyProfilesTable . '
+            SET 
+               OUR_REF = :OUR_REF,
+               telephone = :telephone,
+               email = :email,
+               fax = :fax,
+               address = :address';
+        $queryIntoDocument = 'INSERT INTO DOCUMENT
+            SET 
+                COMPANY_PROFILES_OUR_REF = :OUR_REF,
+                YOUR_REF = :YOUR_REF,
+                ordered_by = :ordered_by,
+                inquiry_date = :inquiry_date,
+                info_valid_on = :info_valid_on,
+                report_type = :report_type,
+                report = :report,
+                exchange_rate = :exchange_rate,
+                currency = :currency';
+       
+           //prepare statements
+           $stmnt = $this->conn->prepare($queryIntoCompanyProfiles);
+           $stmntIntoDocument = $this->conn->prepare($queryIntoDocument);
+
+           //clean data
+           $this->OUR_REF = htmlspecialchars(strip_tags($this->OUR_REF));
+           $this->telephone = htmlspecialchars(strip_tags($this->telephone));
+           $this->email = htmlspecialchars(strip_tags($this->email));
+           $this->address = htmlspecialchars(strip_tags($this->address));
+           $this->fax = htmlspecialchars(strip_tags($this->fax));
+
+           $this->YOUR_REF = htmlspecialchars(strip_tags($this->YOUR_REF));
+            $this->ordered_by = htmlspecialchars(strip_tags($this->ordered_by));
+            $this->inquiry_date = htmlspecialchars(strip_tags($this->inquiry_date));
+            $this->information_valid_on = htmlspecialchars(strip_tags($this->information_valid_on));
+            $this->report_type = htmlspecialchars(strip_tags($this->report_type));
+            $this->report = htmlspecialchars(strip_tags($this->report));
+            $this->exchange_rate = htmlspecialchars(strip_tags($this->exchange_rate));
+            $this->currency = htmlspecialchars(strip_tags($this->currency));
+
+           //Bind data
+           $stmnt->bindParam('OUR_REF', $this->OUR_REF);
+           $stmnt->bindParam('telephone', $this->telephone);
+           $stmnt->bindParam('email', $this->email);
+           $stmnt->bindParam('address', $this->address);
+           $stmnt->bindParam('fax', $this->fax);
+
+
+            $stmntIntoDocument->bindParam('OUR_REF', $this->OUR_REF);
+            $stmntIntoDocument->bindParam('YOUR_REF', $this->YOUR_REF);
+            $stmntIntoDocument->bindParam('ordered_by', $this->ordered_by);
+            $stmntIntoDocument->bindParam('inquiry_date', $this->inquiry_date);
+            $stmntIntoDocument->bindParam('info_valid_on', $this->information_valid_on);
+            $stmntIntoDocument->bindParam('report_type', $this->report_type);
+            $stmntIntoDocument->bindParam('report', $this->report);
+            $stmntIntoDocument->bindParam('exchange_rate', $this->exchange_rate);
+            $stmntIntoDocument->bindParam('currency', $this->currency);
+
+           //execute queries
+          try{
+              $stmnt->execute();
+              $stmntIntoDocument->execute();
+              $this->conn->commit();
+              return true;
+           }catch(PDOException $e){
+               //return error if something goes wrong
+               $this->conn->rollBack();
+               printf("Error: %s" , $e->getMessage());
+               return false;
+
+           }
+
+   }
+
+
+    public function delete(){
+        //begin a transaction
+        $this->conn->beginTransaction();
+        $queryDeleteFromDocument ='DELETE FROM DOCUMENT
+                WHERE COMPANY_PROFILES_OUR_REF = :OUR_REF';
+
+        $queryDeleteFromCompany_Profiles ='DELETE FROM ' . $this->companyProfilesTable .'
+                WHERE OUR_REF = :OUR_REF';
+
+        //prepare statements
+        $stmntDeleteFromCompany_Profiles = $this->conn->prepare($queryDeleteFromCompany_Profiles);
+        $stmntDeleteFromDocument = $this->conn->prepare($queryDeleteFromDocument);
+        
+        //clean data
+            $this->OUR_REF = htmlspecialchars(strip_tags($this->OUR_REF));
+        //bind data
+        $stmntDeleteFromCompany_Profiles->bindParam('OUR_REF', $this->OUR_REF);
+        $stmntDeleteFromDocument->bindParam('OUR_REF', $this->OUR_REF);
+
+
+        //execute queries
+           try{
+               $stmntDeleteFromDocument->execute();
+               $stmntDeleteFromCompany_Profiles->execute();
+               $this->conn->commit();
+               return true;
+            }catch(PDOException $e){
+                //return error if something goes wrong
+                $this->conn->rollBack();
+                printf("Error: %s" , $e->getMessage());
+                return false;
+
+            }
+        
+    }
+
+    public function update(){
+        //begin a transaction
+        $this->conn->beginTransaction();
+        //create query
+        $queryIntoCompanyProfiles = 'UPDATE ' .
+             $this->companyProfilesTable . '
+             SET 
+                telephone = :telephone,
+                email = :email,
+                fax = :fax,
+                address = :address
+            WHERE 
+                OUR_REF = :OUR_REF';
+        
+            //prepare statement
+            $stmnt = $this->conn->prepare($queryIntoCompanyProfiles);
+            //clean data
+            $this->OUR_REF = htmlspecialchars(strip_tags($this->OUR_REF));
+            $this->telephone = htmlspecialchars(strip_tags($this->telephone));
+            $this->email = htmlspecialchars(strip_tags($this->email));
+            $this->address = htmlspecialchars(strip_tags($this->address));
+            $this->fax = htmlspecialchars(strip_tags($this->fax));
+
+            //Bind data
+            $stmnt->bindParam('OUR_REF', $this->OUR_REF);
+            $stmnt->bindParam('telephone', $this->telephone);
+            $stmnt->bindParam('email', $this->email);
+            $stmnt->bindParam('address', $this->address);
+            $stmnt->bindParam('fax', $this->fax);
+
+            //create query
+        $queryIntoDocument = 'UPDATE DOCUMENT
+        SET
+           YOUR_REF = :YOUR_REF,
+           ordered_by = :ordered_by,
+           inquiry_date = :inquiry_date,
+           info_valid_on = :info_valid_on,
+           report_type = :report_type,
+           report = :report,
+           exchange_rate = :exchange_rate,
+           currency = :currency
+        WHERE
+            COMPANY_PROFILES_OUR_REF = :OUR_REF';
+   
+       //prepare statement
+       $stmntIntoDocument = $this->conn->prepare($queryIntoDocument);
+       //clean data
+       $this->YOUR_REF = htmlspecialchars(strip_tags($this->YOUR_REF));
+       $this->ordered_by = htmlspecialchars(strip_tags($this->ordered_by));
+       $this->inquiry_date = htmlspecialchars(strip_tags($this->inquiry_date));
+       $this->information_valid_on = htmlspecialchars(strip_tags($this->information_valid_on));
+       $this->report_type = htmlspecialchars(strip_tags($this->report_type));
+       $this->report = htmlspecialchars(strip_tags($this->report));
+       $this->exchange_rate = htmlspecialchars(strip_tags($this->exchange_rate));
+       $this->currency = htmlspecialchars(strip_tags($this->currency));
+
+       //Bind data
+       $stmntIntoDocument->bindParam('OUR_REF', $this->OUR_REF);
+       $stmntIntoDocument->bindParam('YOUR_REF', $this->YOUR_REF);
+       $stmntIntoDocument->bindParam('ordered_by', $this->ordered_by);
+       $stmntIntoDocument->bindParam('inquiry_date', $this->inquiry_date);
+       $stmntIntoDocument->bindParam('info_valid_on', $this->information_valid_on);
+       $stmntIntoDocument->bindParam('report_type', $this->report_type);
+       $stmntIntoDocument->bindParam('report', $this->report);
+       $stmntIntoDocument->bindParam('exchange_rate', $this->exchange_rate);
+       $stmntIntoDocument->bindParam('currency', $this->currency);
+            //execute queries
+           try{
+               $stmnt->execute();
+               $stmntIntoDocument->execute();
+               $this->conn->commit();
+               return true;
+            }catch(PDOException $e){
+                //return error if something goes wrong
+                $this->conn->rollBack();
+                printf("Error: %s" , $e->getMessage());
+                return false;
+
+            }
+
+
+    }
+
+    //post properties from TERMS_OP_PAYMENT
+    //contains foreign key from company, COMPANY_company_name
+    public $buying_terms_cash;
+    public $buying_terms_credit;
+    public $selling_terms_cash;
+    public $selling_terms_credit;
+
+    //post properties from CONTACTS
+    //contains foreign key from company, COMPANY_company_name
+    public $Comp_address;
+    public $Comp_fax;
+    public $company_email;// as email
+    public $internet;
+    public $tel; // as telephone
+
+    //post properties from PROFILE
+    //contains foreign key from company, COMPANY_company_name
+    public $nominal_capital;
+    public $paid_in_capital;
+    public $subscribed_capital;
+
+    //post profiles from OFFICES_FACTORIES
+    //contains foreign key from company, COMPANY_company_name
+    public  $headoffices;
+    public $branches;
+
+    //post properties from INTERVIEW_DETAILS
+    //contains foreign key from company, COMPANY_company_name
+    public $interviewee_name;
+    public $designation;
+    public $date_of_contact;
+
+    public function createCompany(){
+                //begin a transaction
+            $this->conn->beginTransaction();
+            //create queries
+                $queryIntoCompany = 'INSERT INTO COMPANY
+                    SET 
+                    company_name = :company_name,
+                    establishment_date = :establishment_date,
+                    registration = :registration,
+                    vat_number = :vat_number,
+                    legal_form = :legal_form,
+                    stock_listing = :stock_listing,
+                    credit_opinion = :credit_opinion,
+                    cooperate_credit_rating = :cooperate_credit_rating,
+                    history = :history,
+                    nationalId = :identification,
+                    activities = :activities,
+                    DOCUMENT_YOUR_REF = :DOCUMENT_YOUR_REF';
+
+                $queryIntoCompanyBusiness = 'INSERT INTO COMPANY_BUSINESS
+                    SET 
+                        COMPANY_company_name = :company_name,
+                        suppliers = :suppliers,
+                        recent_sales = :recent_sales,
+                        exports = :exports,
+                        export_ratio = :export_ratio,
+                        domestic_market_share = :domestic_market_share,
+                        business_premises = :business_premises,
+                        type_of_occupation = :type_of_occupation,
+                        location = :location,
+                        main_banks = :main_banks,
+                        payment_morale = :payment_morale,
+                        credit_rating = :credit_rating,
+                        customers = :customers,
+                        imports = :imports,
+                        import_ratio = :import_ratio,
+                        premises_used_as = :premises_used_as';
+            
+                $queryIntoContacts = 'INSERT INTO CONTACTS
+                    SET 
+                    COMPANY_company_name = :company_name, 
+                    fax = :Comp_fax, 
+                    email = :company_email, 
+                    internet = :internet, 
+                    telephone = :tel, 
+                    address = :Comp_address
+                    ';
+
+                $queryIntoTermsOfPayment ='INSERT INTO TERMS_OF_PAYMENT
+                    SET
+                    COMPANY_company_name = :company_name, 
+                    buying_terms_cash = :buying_terms_cash, 
+                    selling_terms_cash = :selling_terms_cash, 
+                    buying_terms_credit = :buying_terms_credit, 
+                    selling_terms_credit = :selling_terms_credit
+                    ';
+                $queryIntoProfile ='INSERT INTO PROFILE
+                    SET
+                    COMPANY_company_name = :company_name, 
+                    nominal_capital = :nominal_capital, 
+                    paid_in_capital = :paid_in_capital, 
+                    subscribed_capital = :subscribed_capital
+                    ';
+                $queryIntoOfficesFactories ='INSERT INTO OFFICES_FACTORIES
+                    SET
+                    COMPANY_company_name = :company_name, 
+                    headoffices = :headoffices, 
+                    branches = :branches
+                    ';
+                $queryIntoInterviewDetails ='INSERT INTO INTERVIEW_DETAILS
+                    SET
+                    COMPANY_company_name = :company_name, 
+                    interviewee_name = :interviewee_name, 
+                    designation = :designation, 
+                    date_of_contact = :date_of_contact
+                    ';
+            //prepare statements
+                $stmntIntoCompany = $this->conn->prepare($queryIntoCompany);
+                $stmntIntoCompanyBusiness = $this->conn->prepare($queryIntoCompanyBusiness);
+                $stmntIntoContacts = $this->conn->prepare($queryIntoContacts);
+                $stmntIntoTermsOfPayment = $this->conn->prepare($queryIntoTermsOfPayment);
+                $stmntIntoProfile = $this->conn->prepare($queryIntoProfile);
+                $stmntIntoOfficesFactories = $this->conn->prepare($queryIntoOfficesFactories);
+                $stmntIntoInterviewDetails = $this->conn->prepare($queryIntoInterviewDetails);
+
+                //clean data
+                $this->company_name = htmlspecialchars(strip_tags($this->company_name));
+                    $this->establishment_date = htmlspecialchars(strip_tags($this->establishment_date));
+                    $this->registration = htmlspecialchars(strip_tags($this->registration));
+                    $this->vat_number = htmlspecialchars(strip_tags($this->vat_number));
+                    $this->legal_form = htmlspecialchars(strip_tags($this->legal_form));
+                    $this->stock_listing = htmlspecialchars(strip_tags($this->stock_listing));
+                    $this->credit_opinion = htmlspecialchars(strip_tags($this->credit_opinion));
+                    $this->cooperate_credit_rating = htmlspecialchars(strip_tags($this->cooperate_credit_rating));
+                    $this->history = htmlspecialchars(strip_tags($this->history));
+                    $this->activities = htmlspecialchars(strip_tags($this->activities));
+                    $this->identification = htmlspecialchars(strip_tags($this->identification));
+                    $this->YOUR_REF = htmlspecialchars(strip_tags($this->YOUR_REF));
+
+                $this->suppliers = htmlspecialchars(strip_tags($this->suppliers));
+                    $this->recent_sales = htmlspecialchars(strip_tags($this->recent_sales));
+                    $this->exports = htmlspecialchars(strip_tags($this->exports));
+                    $this->export_ratio = htmlspecialchars(strip_tags($this->export_ratio));
+                    $this->domestic_market_share = htmlspecialchars(strip_tags($this->domestic_market_share));
+                    $this->business_premises = htmlspecialchars(strip_tags($this->business_premises));
+                    $this->type_of_occupation = htmlspecialchars(strip_tags($this->type_of_occupation));
+                    $this->location = htmlspecialchars(strip_tags($this->location));
+                    $this->main_banks = htmlspecialchars(strip_tags($this->main_banks));
+                    $this->payment_morale = htmlspecialchars(strip_tags($this->payment_morale));
+                    $this->credit_rating = htmlspecialchars(strip_tags($this->credit_rating));
+                    $this->customers = htmlspecialchars(strip_tags($this->customers));
+                    $this->imports = htmlspecialchars(strip_tags($this->imports));
+                    $this->import_ratio = htmlspecialchars(strip_tags($this->import_ratio));
+                    $this->premises_used_as = htmlspecialchars(strip_tags($this->premises_used_as));
+
+                $this->Comp_fax = htmlspecialchars(strip_tags($this->Comp_fax));
+                    $this->company_email = htmlspecialchars(strip_tags($this->company_email));
+                    $this->internet = htmlspecialchars(strip_tags($this->internet));
+                    $this->tel = htmlspecialchars(strip_tags($this->tel));
+                    $this->Comp_address = htmlspecialchars(strip_tags($this->Comp_address));
+
+
+                $this->buying_terms_cash = htmlspecialchars(strip_tags($this->buying_terms_cash));
+                    $this->selling_terms_cash = htmlspecialchars(strip_tags($this->selling_terms_cash));
+                    $this->buying_terms_credit = htmlspecialchars(strip_tags($this->buying_terms_credit));
+                    $this->selling_terms_credit = htmlspecialchars(strip_tags($this->selling_terms_credit));
+                    
+                $this->nominal_capital = htmlspecialchars(strip_tags($this->nominal_capital));
+                    $this->paid_in_capital = htmlspecialchars(strip_tags($this->paid_in_capital));
+                    $this->subscribed_capital = htmlspecialchars(strip_tags($this->subscribed_capital));
+                    
+                $this->headoffices = htmlspecialchars(strip_tags($this->headoffices));
+                    $this->branches = htmlspecialchars(strip_tags($this->branches));
+                    
+                $this->interviewee_name = htmlspecialchars(strip_tags($this->interviewee_name));
+                    $this->designation = htmlspecialchars(strip_tags($this->designation));
+                    $this->date_of_contact = htmlspecialchars(strip_tags($this->date_of_contact));
+
+                //Bind data
+                $stmntIntoCompany->bindParam('company_name', $this->company_name);
+                    $stmntIntoCompany->bindParam('establishment_date', $this->establishment_date);
+                    $stmntIntoCompany->bindParam('registration', $this->registration);
+                    $stmntIntoCompany->bindParam('vat_number', $this->vat_number);
+                    $stmntIntoCompany->bindParam('legal_form', $this->legal_form);
+                    $stmntIntoCompany->bindParam('stock_listing', $this->stock_listing);
+                    $stmntIntoCompany->bindParam('credit_opinion', $this->credit_opinion);
+                    $stmntIntoCompany->bindParam('history', $this->history);
+                    $stmntIntoCompany->bindParam('cooperate_credit_rating', $this->cooperate_credit_rating);
+                    $stmntIntoCompany->bindParam('identification', $this->identification);
+                    $stmntIntoCompany->bindParam('activities', $this->activities);
+                    $stmntIntoCompany->bindParam('DOCUMENT_YOUR_REF', $this->YOUR_REF);
+
+
+                $stmntIntoCompanyBusiness->bindParam('company_name', $this->company_name);
+                    $stmntIntoCompanyBusiness->bindParam('suppliers', $this->suppliers);
+                    $stmntIntoCompanyBusiness->bindParam('recent_sales', $this->recent_sales);
+                    $stmntIntoCompanyBusiness->bindParam('exports', $this->exports);
+                    $stmntIntoCompanyBusiness->bindParam('export_ratio', $this->export_ratio);
+                    $stmntIntoCompanyBusiness->bindParam('domestic_market_share', $this->domestic_market_share);
+                    $stmntIntoCompanyBusiness->bindParam('business_premises', $this->business_premises);
+                    $stmntIntoCompanyBusiness->bindParam('type_of_occupation', $this->type_of_occupation);
+                    $stmntIntoCompanyBusiness->bindParam('location', $this->location);
+                    $stmntIntoCompanyBusiness->bindParam('main_banks', $this->main_banks);
+                    $stmntIntoCompanyBusiness->bindParam('payment_morale', $this->payment_morale);
+                    $stmntIntoCompanyBusiness->bindParam('credit_rating', $this->credit_rating);
+                    $stmntIntoCompanyBusiness->bindParam('customers', $this->customers);
+                    $stmntIntoCompanyBusiness->bindParam('imports', $this->imports);
+                    $stmntIntoCompanyBusiness->bindParam('import_ratio', $this->import_ratio);
+                    $stmntIntoCompanyBusiness->bindParam('premises_used_as', $this->premises_used_as);
+                
+                $stmntIntoContacts->bindParam('company_name', $this->company_name);
+                    $stmntIntoContacts->bindParam('Comp_fax', $this->Comp_fax);
+                    $stmntIntoContacts->bindParam('company_email', $this->company_email);
+                    $stmntIntoContacts->bindParam('internet', $this->internet);
+                    $stmntIntoContacts->bindParam('tel', $this->tel);
+                    $stmntIntoContacts->bindParam('Comp_address', $this->Comp_address);
+
+
+                $stmntIntoTermsOfPayment->bindParam('company_name', $this->company_name);
+                    $stmntIntoTermsOfPayment->bindParam('buying_terms_cash', $this->buying_terms_cash);
+                    $stmntIntoTermsOfPayment->bindParam('selling_terms_cash', $this->selling_terms_cash);
+                    $stmntIntoTermsOfPayment->bindParam('buying_terms_credit', $this->buying_terms_credit);
+                    $stmntIntoTermsOfPayment->bindParam('selling_terms_credit', $this->selling_terms_credit);
+                
+                $stmntIntoProfile->bindParam('company_name', $this->company_name);
+                    $stmntIntoProfile->bindParam('nominal_capital', $this->nominal_capital);
+                    $stmntIntoProfile->bindParam('paid_in_capital', $this->paid_in_capital);
+                    $stmntIntoProfile->bindParam('subscribed_capital', $this->subscribed_capital);
+
+                $stmntIntoOfficesFactories->bindParam('company_name', $this->company_name);
+                    $stmntIntoOfficesFactories->bindParam('headoffices', $this->headoffices);
+                    $stmntIntoOfficesFactories->bindParam('branches', $this->branches);
+                    
+                $stmntIntoInterviewDetails->bindParam('company_name', $this->company_name);
+                    $stmntIntoInterviewDetails->bindParam('interviewee_name', $this->interviewee_name);
+                    $stmntIntoInterviewDetails->bindParam('designation', $this->designation);
+                    $stmntIntoInterviewDetails->bindParam('date_of_contact', $this->date_of_contact);
+                    //execute queries
+                try{
+                    $stmntIntoCompany->execute();
+                    $stmntIntoCompanyBusiness->execute();
+                    $stmntIntoContacts->execute();
+                    $stmntIntoInterviewDetails->execute();
+                    $stmntIntoProfile->execute();
+                    $stmntIntoOfficesFactories->execute();
+                    $stmntIntoTermsOfPayment->execute();
+                    $this->conn->commit();
+                    return true;
+                }catch(PDOException $e){
+                    //return error if something goes wrong
+                    $this->conn->rollBack();
+                    printf("Error: %s" , $e->getMessage());
+                    return false;
+
+                }
+
+
+    }
+
+    public function updateCompany(){
+            //begin a transaction
+        $this->conn->beginTransaction();
+        //create queries
+        $queryIntoCompany = 'UPDATE COMPANY
+            SET 
+                company_name = :company_name,
+                establishment_date = :establishment_date,
+                registration = :registration,
+                vat_number = :vat_number,
+                legal_form = :legal_form,
+                stock_listing = :stock_listing,
+                credit_opinion = :credit_opinion,
+                cooperate_credit_rating = :cooperate_credit_rating,
+                history = :history,
+                nationalId = :identification,
+                activities = :activities
+            WHERE
+                DOCUMENT_YOUR_REF = :DOCUMENT_YOUR_REF';
+
+        $queryIntoCompanyBusiness = 'UPDATE COMPANY_BUSINESS
+            SET 
+                suppliers = :suppliers,
+                recent_sales = :recent_sales,
+                exports = :exports,
+                export_ratio = :export_ratio,
+                domestic_market_share = :domestic_market_share,
+                business_premises = :business_premises,
+                type_of_occupation = :type_of_occupation,
+                location = :location,
+                main_banks = :main_banks,
+                payment_morale = :payment_morale,
+                credit_rating = :credit_rating,
+                customers = :customers,
+                imports = :imports,
+                import_ratio = :import_ratio,
+                premises_used_as = :premises_used_as
+            WHERE
+                COMPANY_company_name = :company_name';
+    
+        $queryIntoContacts = 'UPDATE CONTACTS
+            SET
+            fax = :Comp_fax, 
+            email = :company_email, 
+            internet = :internet, 
+            telephone = :tel, 
+            address = :Comp_address
+            WHERE
+                COMPANY_company_name = :company_name
+            ';
+
+        $queryIntoTermsOfPayment ='UPDATE TERMS_OF_PAYMENT
+            SET
+            buying_terms_cash = :buying_terms_cash, 
+            selling_terms_cash = :selling_terms_cash, 
+            buying_terms_credit = :buying_terms_credit, 
+            selling_terms_credit = :selling_terms_credit
+            WHERE
+                COMPANY_company_name = :company_name
+            ';
+        $queryIntoProfile ='UPDATE PROFILE
+            SET 
+            nominal_capital = :nominal_capital, 
+            paid_in_capital = :paid_in_capital, 
+            subscribed_capital = :subscribed_capital
+            WHERE
+                COMPANY_company_name = :company_name
+            ';
+        $queryIntoOfficesFactories ='UPDATE OFFICES_FACTORIES
+            SET
+            headoffices = :headoffices, 
+            branches = :branches
+            WHERE
+                COMPANY_company_name = :company_name
+            ';
+        $queryIntoInterviewDetails ='UPDATE INTERVIEW_DETAILS
+            SET
+            interviewee_name = :interviewee_name, 
+            designation = :designation, 
+            date_of_contact = :date_of_contact
+            WHERE
+                COMPANY_company_name = :company_name
+            ';
+        //prepare statements
+        $stmntIntoCompany = $this->conn->prepare($queryIntoCompany);
+        $stmntIntoCompanyBusiness = $this->conn->prepare($queryIntoCompanyBusiness);
+        $stmntIntoContacts = $this->conn->prepare($queryIntoContacts);
+        $stmntIntoTermsOfPayment = $this->conn->prepare($queryIntoTermsOfPayment);
+        $stmntIntoProfile = $this->conn->prepare($queryIntoProfile);
+        $stmntIntoOfficesFactories = $this->conn->prepare($queryIntoOfficesFactories);
+        $stmntIntoInterviewDetails = $this->conn->prepare($queryIntoInterviewDetails);
+
+        //clean data
+        $this->company_name = htmlspecialchars(strip_tags($this->company_name));
+            $this->establishment_date = htmlspecialchars(strip_tags($this->establishment_date));
+            $this->registration = htmlspecialchars(strip_tags($this->registration));
+            $this->vat_number = htmlspecialchars(strip_tags($this->vat_number));
+            $this->legal_form = htmlspecialchars(strip_tags($this->legal_form));
+            $this->stock_listing = htmlspecialchars(strip_tags($this->stock_listing));
+            $this->credit_opinion = htmlspecialchars(strip_tags($this->credit_opinion));
+            $this->cooperate_credit_rating = htmlspecialchars(strip_tags($this->cooperate_credit_rating));
+            $this->history = htmlspecialchars(strip_tags($this->history));
+            $this->activities = htmlspecialchars(strip_tags($this->activities));
+            $this->identification = htmlspecialchars(strip_tags($this->identification));
+            $this->YOUR_REF = htmlspecialchars(strip_tags($this->YOUR_REF));
+
+        $this->suppliers = htmlspecialchars(strip_tags($this->suppliers));
+            $this->recent_sales = htmlspecialchars(strip_tags($this->recent_sales));
+            $this->exports = htmlspecialchars(strip_tags($this->exports));
+            $this->export_ratio = htmlspecialchars(strip_tags($this->export_ratio));
+            $this->domestic_market_share = htmlspecialchars(strip_tags($this->domestic_market_share));
+            $this->business_premises = htmlspecialchars(strip_tags($this->business_premises));
+            $this->type_of_occupation = htmlspecialchars(strip_tags($this->type_of_occupation));
+            $this->location = htmlspecialchars(strip_tags($this->location));
+            $this->main_banks = htmlspecialchars(strip_tags($this->main_banks));
+            $this->payment_morale = htmlspecialchars(strip_tags($this->payment_morale));
+            $this->credit_rating = htmlspecialchars(strip_tags($this->credit_rating));
+            $this->customers = htmlspecialchars(strip_tags($this->customers));
+            $this->imports = htmlspecialchars(strip_tags($this->imports));
+            $this->import_ratio = htmlspecialchars(strip_tags($this->import_ratio));
+            $this->premises_used_as = htmlspecialchars(strip_tags($this->premises_used_as));
+
+        $this->Comp_fax = htmlspecialchars(strip_tags($this->Comp_fax));
+            $this->company_email = htmlspecialchars(strip_tags($this->company_email));
+            $this->internet = htmlspecialchars(strip_tags($this->internet));
+            $this->tel = htmlspecialchars(strip_tags($this->tel));
+            $this->Comp_address = htmlspecialchars(strip_tags($this->Comp_address));
+
+
+        $this->buying_terms_cash = htmlspecialchars(strip_tags($this->buying_terms_cash));
+            $this->selling_terms_cash = htmlspecialchars(strip_tags($this->selling_terms_cash));
+            $this->buying_terms_credit = htmlspecialchars(strip_tags($this->buying_terms_credit));
+            $this->selling_terms_credit = htmlspecialchars(strip_tags($this->selling_terms_credit));
+            
+        $this->nominal_capital = htmlspecialchars(strip_tags($this->nominal_capital));
+            $this->paid_in_capital = htmlspecialchars(strip_tags($this->paid_in_capital));
+            $this->subscribed_capital = htmlspecialchars(strip_tags($this->subscribed_capital));
+            
+        $this->headoffices = htmlspecialchars(strip_tags($this->headoffices));
+            $this->branches = htmlspecialchars(strip_tags($this->branches));
+            
+        $this->interviewee_name = htmlspecialchars(strip_tags($this->interviewee_name));
+            $this->designation = htmlspecialchars(strip_tags($this->designation));
+            $this->date_of_contact = htmlspecialchars(strip_tags($this->date_of_contact));
+
+        //Bind data
+        $stmntIntoCompany->bindParam('company_name', $this->company_name);
+            $stmntIntoCompany->bindParam('establishment_date', $this->establishment_date);
+            $stmntIntoCompany->bindParam('registration', $this->registration);
+            $stmntIntoCompany->bindParam('vat_number', $this->vat_number);
+            $stmntIntoCompany->bindParam('legal_form', $this->legal_form);
+            $stmntIntoCompany->bindParam('stock_listing', $this->stock_listing);
+            $stmntIntoCompany->bindParam('credit_opinion', $this->credit_opinion);
+            $stmntIntoCompany->bindParam('history', $this->history);
+            $stmntIntoCompany->bindParam('cooperate_credit_rating', $this->cooperate_credit_rating);
+            $stmntIntoCompany->bindParam('identification', $this->identification);
+            $stmntIntoCompany->bindParam('activities', $this->activities);
+            $stmntIntoCompany->bindParam('DOCUMENT_YOUR_REF', $this->YOUR_REF);
+
+
+        $stmntIntoCompanyBusiness->bindParam('company_name', $this->company_name);
+            $stmntIntoCompanyBusiness->bindParam('suppliers', $this->suppliers);
+            $stmntIntoCompanyBusiness->bindParam('recent_sales', $this->recent_sales);
+            $stmntIntoCompanyBusiness->bindParam('exports', $this->exports);
+            $stmntIntoCompanyBusiness->bindParam('export_ratio', $this->export_ratio);
+            $stmntIntoCompanyBusiness->bindParam('domestic_market_share', $this->domestic_market_share);
+            $stmntIntoCompanyBusiness->bindParam('business_premises', $this->business_premises);
+            $stmntIntoCompanyBusiness->bindParam('type_of_occupation', $this->type_of_occupation);
+            $stmntIntoCompanyBusiness->bindParam('location', $this->location);
+            $stmntIntoCompanyBusiness->bindParam('main_banks', $this->main_banks);
+            $stmntIntoCompanyBusiness->bindParam('payment_morale', $this->payment_morale);
+            $stmntIntoCompanyBusiness->bindParam('credit_rating', $this->credit_rating);
+            $stmntIntoCompanyBusiness->bindParam('customers', $this->customers);
+            $stmntIntoCompanyBusiness->bindParam('imports', $this->imports);
+            $stmntIntoCompanyBusiness->bindParam('import_ratio', $this->import_ratio);
+            $stmntIntoCompanyBusiness->bindParam('premises_used_as', $this->premises_used_as);
+        
+        $stmntIntoContacts->bindParam('company_name', $this->company_name);
+            $stmntIntoContacts->bindParam('Comp_fax', $this->Comp_fax);
+            $stmntIntoContacts->bindParam('company_email', $this->company_email);
+            $stmntIntoContacts->bindParam('internet', $this->internet);
+            $stmntIntoContacts->bindParam('tel', $this->tel);
+            $stmntIntoContacts->bindParam('Comp_address', $this->Comp_address);
+
+
+        $stmntIntoTermsOfPayment->bindParam('company_name', $this->company_name);
+            $stmntIntoTermsOfPayment->bindParam('buying_terms_cash', $this->buying_terms_cash);
+            $stmntIntoTermsOfPayment->bindParam('selling_terms_cash', $this->selling_terms_cash);
+            $stmntIntoTermsOfPayment->bindParam('buying_terms_credit', $this->buying_terms_credit);
+            $stmntIntoTermsOfPayment->bindParam('selling_terms_credit', $this->selling_terms_credit);
+        
+        $stmntIntoProfile->bindParam('company_name', $this->company_name);
+            $stmntIntoProfile->bindParam('nominal_capital', $this->nominal_capital);
+            $stmntIntoProfile->bindParam('paid_in_capital', $this->paid_in_capital);
+            $stmntIntoProfile->bindParam('subscribed_capital', $this->subscribed_capital);
+
+        $stmntIntoOfficesFactories->bindParam('company_name', $this->company_name);
+            $stmntIntoOfficesFactories->bindParam('headoffices', $this->headoffices);
+            $stmntIntoOfficesFactories->bindParam('branches', $this->branches);
+            
+        $stmntIntoInterviewDetails->bindParam('company_name', $this->company_name);
+            $stmntIntoInterviewDetails->bindParam('interviewee_name', $this->interviewee_name);
+            $stmntIntoInterviewDetails->bindParam('designation', $this->designation);
+            $stmntIntoInterviewDetails->bindParam('date_of_contact', $this->date_of_contact);
+            //execute queries
+        try{
+            $stmntIntoCompany->execute();
+            $stmntIntoCompanyBusiness->execute();
+            $stmntIntoContacts->execute();
+            $stmntIntoInterviewDetails->execute();
+            $stmntIntoProfile->execute();
+            $stmntIntoOfficesFactories->execute();
+            $stmntIntoTermsOfPayment->execute();
+            $this->conn->commit();
+            return true;
+        }catch(PDOException $e){
+            //return error if something goes wrong
+            $this->conn->rollBack();
+            printf("Error: %s" , $e->getMessage());
+            return false;
+
+        }
+    }
+
+    public function deleteCompany(){
+        //get the company name
+        $query =  'SELECT
+            p.company_name
+            
+        FROM
+            COMPANY p
+        WHERE
+             p.DOCUMENT_YOUR_REF = ?';
+            
+        //prepare statement
+        $stmt = $this->conn->prepare($query);
+
+        //bind ID
+        $stmt->bindParam(1, $this->YOUR_REF);
+
+        //execute query
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        extract($row);
+
+            
+        //set properties
+            
+        $this->company_name =$row['company_name'];
+
+            //begin a transaction
+        $this->conn->beginTransaction();
+        //create queries
+        $queryIntoCompany = 'DELETE FROM COMPANY
+            WHERE
+                DOCUMENT_YOUR_REF = :DOCUMENT_YOUR_REF';
+
+        $queryIntoCompanyBusiness = 'DELETE FROM COMPANY_BUSINESS
+            WHERE
+                COMPANY_company_name = :company_name';
+    
+        $queryIntoContacts = 'DELETE FROM CONTACTS
+            WHERE
+                COMPANY_company_name = :company_name
+            ';
+
+        $queryIntoTermsOfPayment ='DELETE FROM TERMS_OF_PAYMENT
+            WHERE
+                COMPANY_company_name = :company_name
+            ';
+        $queryIntoProfile ='DELETE FROM PROFILE
+            WHERE
+                COMPANY_company_name = :company_name
+            ';
+        $queryIntoOfficesFactories ='DELETE FROM OFFICES_FACTORIES
+            WHERE
+                COMPANY_company_name = :company_name
+            ';
+        $queryIntoInterviewDetails ='DELETE FROM INTERVIEW_DETAILS
+            WHERE
+                COMPANY_company_name = :company_name
+            ';
+        //prepare statements
+        $stmntIntoCompany = $this->conn->prepare($queryIntoCompany);
+        $stmntIntoCompanyBusiness = $this->conn->prepare($queryIntoCompanyBusiness);
+        $stmntIntoContacts = $this->conn->prepare($queryIntoContacts);
+        $stmntIntoTermsOfPayment = $this->conn->prepare($queryIntoTermsOfPayment);
+        $stmntIntoProfile = $this->conn->prepare($queryIntoProfile);
+        $stmntIntoOfficesFactories = $this->conn->prepare($queryIntoOfficesFactories);
+        $stmntIntoInterviewDetails = $this->conn->prepare($queryIntoInterviewDetails);
+
+        //clean data
+        $this->company_name = htmlspecialchars(strip_tags($this->company_name));
+        $this->YOUR_REF = htmlspecialchars(strip_tags($this->YOUR_REF));
+
+        //Bind data
+        $stmntIntoCompany->bindParam('DOCUMENT_YOUR_REF', $this->YOUR_REF);
+        $stmntIntoCompanyBusiness->bindParam('company_name', $this->company_name);
+        $stmntIntoContacts->bindParam('company_name', $this->company_name);
+        $stmntIntoTermsOfPayment->bindParam('company_name', $this->company_name);
+        $stmntIntoProfile->bindParam('company_name', $this->company_name);
+        $stmntIntoOfficesFactories->bindParam('company_name', $this->company_name);
+        $stmntIntoInterviewDetails->bindParam('company_name', $this->company_name);
+           //execute queries
+        try{
+            $stmntIntoCompanyBusiness->execute();
+            $stmntIntoContacts->execute();
+            $stmntIntoInterviewDetails->execute();
+            $stmntIntoProfile->execute();
+            $stmntIntoOfficesFactories->execute();
+            $stmntIntoTermsOfPayment->execute();
+            $stmntIntoCompany->execute();
+            $this->conn->commit();
+            return true;
+        }catch(PDOException $e){
+            //return error if something goes wrong
+            $this->conn->rollBack();
+            printf("Error: %s" , $e->getMessage());
+            return false;
+
+     
+        }
+    }
+
+    public function addShareholder($shareHolderData){
+        $YOUR_REF = $shareHolderData->YOUR_REF;
+        //pick company name in database here
+
+        $query = 'SELECT 
+        p.company_name
+        FROM
+            COMPANY p
+        WHERE 
+            p.DOCUMENT_YOUR_REF = ?';
+        //prepare statement
+        $stmt = $this->conn->prepare($query);
+        //bind ID
+        $stmt->bindParam(1, $YOUR_REF);
+        //execute query
+        try{
+            $stmt->execute();
+        }catch(PDOException $e){
+            printf("Error: %s" , $e->getMessage());
+                    
+        }
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        extract($row);
+        $company_name = $row['company_name'];
+      
+        //shareholder data
+        $name = $shareHolderData->shareholder->name;
+        $position = $shareHolderData->shareholder->position;
+        $amount = $shareHolderData->shareholder->amount;
+        $ratio = $shareHolderData->shareholder->ratio;
+
+        //director data
+        $isactive = $shareHolderData->director->isactive;
+        $title = $shareHolderData->director->title;
+        $education = $shareHolderData->director->education;
+        $country = $shareHolderData->director->country;
+        $remarks = $shareHolderData->director->remarks;
+
+        //directorship data
+        $directorships = $shareHolderData->director->directorships;
+
+        //begin a transaction
+        $this->conn->beginTransaction();
+        //create queries
+        $queryIntoSHAREHOLDERS = 'INSERT INTO 
+             SHAREHOLDERS
+             SET 
+                name = :name,
+                position = :position,
+                amount = :amount,
+                COMPANY_company_name = :COMPANY_company_name,
+                ratio = :ratio ';
+
+         $queryIntoDIRECTORS = 'INSERT INTO DIRECTORS
+             SET 
+                isactive  = :isactive ,
+                 title = :title,
+                 education = :education,
+                 country = :country,
+                 remarks = :remarks,
+                 SHAREHOLDERS_id = LAST_INSERT_ID(),
+                 COMPANY_company_name = :COMPANY_company_name';
+
+        $queryIntoDIRECTORSHIPS = 'INSERT INTO DIRECTORSHIPS
+            SET
+                company_name= :company,
+                 SHAREHOLDERS_id = LAST_INSERT_ID()
+        ';       
+
+            
+            //prepare statements
+            $stmntIntoSHAREHOLDERS = $this->conn->prepare($queryIntoSHAREHOLDERS);
+            $stmntIntoDIRECTORS = $this->conn->prepare($queryIntoDIRECTORS);
+            $stmntIntoDIRECTORSHIPS = $this->conn->prepare($queryIntoDIRECTORSHIPS);
+ 
+            //clean data
+            $name = htmlspecialchars(strip_tags($name));
+            $position = htmlspecialchars(strip_tags($position));
+            $amount = htmlspecialchars(strip_tags($amount));
+            $ratio = htmlspecialchars(strip_tags($ratio));
+
+ 
+            $isactive = htmlspecialchars(strip_tags($isactive));
+             $title = htmlspecialchars(strip_tags($title));
+             $education = htmlspecialchars(strip_tags($education));
+             $country = htmlspecialchars(strip_tags($country));
+             $remarks = htmlspecialchars(strip_tags($remarks));
+ 
+            //Bind data
+            $stmntIntoSHAREHOLDERS->bindParam('name', $name);
+            $stmntIntoSHAREHOLDERS->bindParam('position', $position);
+            $stmntIntoSHAREHOLDERS->bindParam('amount', $amount);
+            $stmntIntoSHAREHOLDERS->bindParam('ratio', $ratio);
+            $stmntIntoSHAREHOLDERS->bindParam('COMPANY_company_name', $company_name);
+ 
+ 
+             $stmntIntoDIRECTORS->bindParam('isactive', $isactive);
+             $stmntIntoDIRECTORS->bindParam('title', $title);
+             $stmntIntoDIRECTORS->bindParam('education', $education);
+             $stmntIntoDIRECTORS->bindParam('country', $country);
+             $stmntIntoDIRECTORS->bindParam('remarks', $remarks);
+            $stmntIntoDIRECTORS->bindParam('COMPANY_company_name', $company_name);
+            
+            //execute queries
+           try{
+               $stmntIntoSHAREHOLDERS->execute();
+               $stmntIntoDIRECTORS->execute();
+
+               //insert into directorships
+               foreach($directorships as $row){
+                    $company = $row;
+                    $company = htmlspecialchars(strip_tags($company));
+                    $stmntIntoDIRECTORSHIPS->bindParam('company', $company);
+                    $stmntIntoDIRECTORSHIPS->execute();
+                    
+               }
+               $this->conn->commit();
+               return true;
+            }catch(PDOException $e){
+                //return error if something goes wrong
+                $this->conn->rollBack();
+                printf("Error: %s" , $e->getMessage());
+                return false;
+ 
+            }
+ 
+    }
+
+    public function deleteShareholder($shareHolderid){
+        //begin a transaction
+        $this->conn->beginTransaction();
+        //create queries
+        $queryIntoSHAREHOLDERS = 'DELETE FROM 
+            SHAREHOLDERS
+        WHERE
+            id = :shareHolderid';
+
+         $queryIntoDIRECTORS = 'DELETE FROM 
+             DIRECTORS
+        WHERE
+            SHAREHOLDERS_id = :shareHolderid';
+        $queryIntoDIRECTORSHIPS = 'DELETE FROM 
+             DIRECTORSHIPS
+        WHERE
+            SHAREHOLDERS_id = :shareHolderid';
+            //prepare statements
+            $stmntIntoSHAREHOLDERS = $this->conn->prepare($queryIntoSHAREHOLDERS);
+            $stmntIntoDIRECTORS = $this->conn->prepare($queryIntoDIRECTORS);
+            $stmntIntoDIRECTORSHIPS = $this->conn->prepare($queryIntoDIRECTORSHIPS);
+            //bind parameters
+            $stmntIntoSHAREHOLDERS->bindParam('shareHolderid', $shareHolderid);
+ 
+            $stmntIntoDIRECTORSHIPS->bindParam('shareHolderid', $shareHolderid);
+            $stmntIntoDIRECTORS->bindParam('shareHolderid', $shareHolderid);
+
+           try{
+               $stmntIntoDIRECTORSHIPS->execute();
+               $stmntIntoDIRECTORS->execute();
+               $stmntIntoSHAREHOLDERS->execute();
+            //    $stmntIntoDIRECTORSHIPS->execute();
+               $this->conn->commit();
+               return true;
+            }catch(PDOException $e){
+                //return error if something goes wrong
+                $this->conn->rollBack();
+                printf("Error: %s" , $e->getMessage());
+                return false;
+ 
+            }
+        
+        
+ 
+    }
+ 
+    
+ 
+}

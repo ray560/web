@@ -9,13 +9,11 @@ body, #slider, .wrap, .slide-content{
   height: 100vh;
   overflow-x: hidden;
 }
-
 /*fixed navigation*/
 .navigation{
   height: 100px;
   width: 100%;
   background-color: rgba(0, 0, 0, 0.7);
-  position: fixed;
 }
 
 .navigation ul{
@@ -45,6 +43,86 @@ body, #slider, .wrap, .slide-content{
 .navigation a:hover{
   color: rgb(0, 0, 0);
 }
+
+/* bus */
+
+#mainPage{
+  background-color: #5e5d5d;
+  width: 1400px;
+}
+#bus{
+  margin-left: auto;
+  margin-right: auto;
+
+}
+#driver_dock{
+  height: 300px;
+
+}
+#passangers_area{
+
+}
+.col1,.col3{
+  display: inline;
+  float: left;
+  height: inherit;
+  
+}
+.col2{
+ width: 200px;
+ display: inline;
+ float: left;
+ height: inherit;
+}
+.seat_row{
+width: 400px;
+}
+.seat{
+  display: inline;
+  background-color: gray;
+  border: 1px solid black;
+  font-family: sans-serif;
+  font-size: 2.2em;
+  float: left;
+  text-align: center;
+  line-height: 96px;
+  width: 196px;
+  height: 96px;
+}
+.seat_row:hover{
+  background-color: black;
+  color: white;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 p{
   margin: 20px 0;
@@ -314,7 +392,7 @@ footer a{
     background-image: url(bus3.jpg);
   }
 }
-
+/* 
 -webkit-keyframes image{
   0%{
     background-image: url(bus5.jpg);
@@ -325,4 +403,4 @@ footer a{
   67%{
     background-image: url(bus3.jpg);
   }
-}
+} */
