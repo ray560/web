@@ -4,13 +4,13 @@
 //offers two methods, the stk push and online request query, to confirm  payment.
 class mpesa1{
      //set your consumer key here
-     private $consumerKey = 'erGAfYRAP4u0RBJbYB6ZAa9oxGajx6jX';
+     private $consumerKey = '';
      //set your consumer sectet here
-     private $consumerSecret = 'dRvDmBfAAVmiIZlP';
+     private $consumerSecret = '';
 ///Used to generate a password used to interact with any Safaricom Mpesa API
 
     //set here your callback url, 
-    private $callbackUrl ='https://59e9d0598ace.ngrok.io';
+    private $callbackUrl ='';
 private function GenerateToken() {
     $url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
    
@@ -72,7 +72,8 @@ function stk(string $phoneNumber, string $stkAmount){
             'PartyB' =>  $lipaNaMpesaOnlineShortCode,
             'PhoneNumber' =>  $customerNumber,
             'CallBackURL' => $this->callbackUrl.'/web/mmpesa/callback/input.php',
-            'AccountReference' => 'testing rays project',
+             //-------Project names-------
+            'AccountReference' => ' project',
             'TransactionDesc' => 'testing rays project'
         );
         
